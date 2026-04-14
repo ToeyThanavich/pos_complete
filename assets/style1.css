@@ -1,0 +1,347 @@
+/* ============================================
+   BLACK SHEEP IN THE GARDEN — Design System
+   Rustic Luxury · Minimalist · Mobile-First
+   ============================================ */
+
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@300;400;500&display=swap");
+
+:root {
+  --cream: #f5f0e8;
+  --cream-deep: #ede6d6;
+  --cream-dark: #e2d9c6;
+  --choco: #2c1810;
+  --choco-mid: #4a2c1e;
+  --choco-light: #7a5040;
+  --mangosteen: #5c3d52;
+  --mango-pale: #d4b8cc;
+  --botanical: #4a5e3a;
+  --bot-pale: #c8d4be;
+  --gold: #c9a84c;
+  --gold-pale: #e8d49a;
+  --shadow-soft: 0 4px 24px rgba(44, 24, 16, 0.08);
+  --shadow-card: 0 8px 40px rgba(44, 24, 16, 0.14);
+  --shadow-deep: 0 16px 64px rgba(44, 24, 16, 0.28);
+  --radius: 16px;
+  --radius-sm: 10px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+html {
+  scroll-behavior: smooth;
+}
+body {
+  font-family: "Jost", sans-serif;
+  font-weight: 300;
+  background-color: var(--cream);
+  color: var(--choco);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+h1,
+h2,
+h3,
+h4,
+.serif {
+  font-family: "Cormorant Garamond", serif;
+  font-weight: 400;
+}
+a {
+  text-decoration: none;
+  color: inherit;
+}
+img {
+  max-width: 100%;
+  display: block;
+}
+
+/* Buttons */
+.bs-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: "Jost", sans-serif;
+  font-size: 0.72rem;
+  font-weight: 400;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 12px 24px;
+  border-radius: 50px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.bs-btn-primary {
+  background: var(--choco);
+  color: var(--cream);
+}
+.bs-btn-primary:hover {
+  background: var(--choco-mid);
+  transform: translateY(-1px);
+}
+.bs-btn-outline {
+  background: transparent;
+  color: var(--choco);
+  border: 1px solid rgba(44, 24, 16, 0.22);
+}
+.bs-btn-outline:hover {
+  background: var(--cream-deep);
+}
+.bs-btn-sm {
+  padding: 8px 18px;
+  font-size: 0.65rem;
+}
+.bs-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Forms */
+.bs-input,
+.bs-select,
+.bs-textarea {
+  width: 100%;
+  background: var(--cream-deep);
+  border: 1px solid rgba(44, 24, 16, 0.12);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  font-family: "Jost", sans-serif;
+  font-size: 0.88rem;
+  font-weight: 300;
+  color: var(--choco);
+  outline: none;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.bs-input:focus,
+.bs-select:focus,
+.bs-textarea:focus {
+  border-color: var(--choco-light);
+  box-shadow: 0 0 0 3px rgba(122, 80, 64, 0.12);
+}
+.bs-input::placeholder,
+.bs-textarea::placeholder {
+  color: var(--choco-light);
+  opacity: 0.5;
+}
+.bs-label {
+  display: block;
+  font-size: 0.62rem;
+  font-weight: 400;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--choco-light);
+  margin-bottom: 7px;
+}
+
+/* Cards */
+.bs-card {
+  background: #fdfaf5;
+  border-radius: var(--radius);
+  border: 1px solid rgba(44, 24, 16, 0.06);
+  box-shadow: var(--shadow-soft);
+}
+
+/* Badges */
+.bs-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.62rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 5px 12px;
+  border-radius: 20px;
+}
+.bs-badge-pending {
+  background: var(--gold-pale);
+  color: #7a5010;
+}
+.bs-badge-cooking {
+  background: #fde8cc;
+  color: #9a4010;
+}
+.bs-badge-serving {
+  background: var(--mango-pale);
+  color: var(--mangosteen);
+}
+.bs-badge-completed {
+  background: var(--bot-pale);
+  color: var(--botanical);
+}
+.bs-badge-cancelled {
+  background: #f5dada;
+  color: #902020;
+}
+
+/* Alerts */
+.bs-alert {
+  padding: 12px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 0.82rem;
+  font-weight: 300;
+  margin-bottom: 18px;
+}
+.bs-alert-error {
+  background: #f5dada;
+  color: #802020;
+  border: 1px solid rgba(128, 32, 32, 0.2);
+}
+.bs-alert-success {
+  background: var(--bot-pale);
+  color: var(--botanical);
+  border: 1px solid rgba(74, 94, 58, 0.2);
+}
+
+/* Navbar */
+.bs-navbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(245, 240, 232, 0.93);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(44, 24, 16, 0.08);
+  padding: 0 20px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.bs-navbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.bs-navbar-logo {
+  width: 34px;
+  height: 34px;
+  background: var(--choco);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.bs-navbar-logo svg {
+  width: 20px;
+  height: 20px;
+}
+.bs-navbar-name {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--choco);
+  line-height: 1.1;
+}
+.bs-navbar-sub {
+  font-family: "Jost", sans-serif;
+  font-size: 0.55rem;
+  font-weight: 300;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--choco-light);
+}
+
+/* Divider */
+.bs-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 24px 0;
+}
+.bs-divider-line {
+  flex: 1;
+  height: 1px;
+  background: rgba(44, 24, 16, 0.1);
+}
+.bs-divider-gem {
+  width: 6px;
+  height: 6px;
+  background: var(--gold);
+  transform: rotate(45deg);
+  opacity: 0.7;
+  flex-shrink: 0;
+}
+
+/* Animations */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.animate-up {
+  animation: fadeUp 0.4s ease forwards;
+}
+.animate-in {
+  animation: fadeIn 0.3s ease forwards;
+}
+.delay-1 {
+  animation-delay: 0.08s;
+  opacity: 0;
+}
+.delay-2 {
+  animation-delay: 0.16s;
+  opacity: 0;
+}
+.delay-3 {
+  animation-delay: 0.24s;
+  opacity: 0;
+}
+.delay-4 {
+  animation-delay: 0.32s;
+  opacity: 0;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--cream-dark);
+  border-radius: 2px;
+}
+/* ---- โครงสร้าง Layout สำหรับหน้า Staff ---- */
+.admin-wrap {
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
+}
+.admin-main {
+  flex: 1;
+  margin-left: 220px; /* เว้นระยะหลบเมนู Sidebar ด้านซ้าย */
+  display: flex;
+  flex-direction: column;
+}
+.main-pad {
+  padding: 26px;
+}

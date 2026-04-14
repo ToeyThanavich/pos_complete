@@ -1,0 +1,75 @@
+-- สร้าง Database
+CREATE DATABASE cafe_pos;
+USE cafe_pos;
+
+-- ตารางเก็บโต๊ะ (สำหรับสแกน QR Code)
+CREATE TABLE tables (
+    table_id INT AUTO_INCREMENT PRIMARY KEY,
+    table_number VARCHAR(10) NOT NULL,
+    qr_code_url VARCHAR(255) NULL, -- เก็บลิงก์ QR
+    status ENUM('available', 'occupied') DEFAULT 'available'
+);
+
+-- ตารางประเภทเมนู (เช่น เครื่องดื่มร้อน, เย็น, ปั่น)
+CREATE TABLE categories (
+    category_id INT AUTO_INCREMENT PRIMARY KEY,
+    category_name VARCHAR(100) NOT NULL
+);
+
+-- ตารางเมนู
+CREATE TABLE menu_items (
+    item_id INT AUTO_INCREMENT PRIMARY KEY,
+    category_id INT,
+    item_name VARCHAR(150) NOT NULL,
+    description TEXT NULL,
+    price DECIMAL(10,2) NOT NULL,
+    size ENUM('HOT','ICED','FRAPPE') NULL,
+    status ENUM('available','unavailable') DEFAULT 'available',
+    FOREIGN KEY (category_id) REFERENCES categories(category_id)
+);
+
+-- ตารางคำสั่งซื้อ (Order หลัก)
+CREATE TABLE orders (
+    order_id INT AUTO_INCREMENT PRIMARY KEY,
+    table_id INT,
+    order_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    status ENUM('pending','preparing','served','paid') DEFAULT 'pending',
+    FOREIGN KEY (table_id) REFERENCES tables(table_id)
+);
+
+-- รายการอาหารที่อยู่ในแต่ละ Order
+CREATE TABLE order_items (
+    order_item_id INT AUTO_INCREMENT PRIMARY KEY,
+    order_id INT,
+    item_id INT,
+    quantity INT DEFAULT 1,
+    note VARCHAR(255) NULL, -- เช่น หวานน้อย, เพิ่มช็อต
+    price DECIMAL(10,2) NOT NULL, -- backup ราคาตอนนั้น
+    FOREIGN KEY (order_id) REFERENCES orders(order_id),
+    FOREIGN KEY (item_id) REFERENCES menu_items(item_id)
+);
+
+
+------------------------------------------------------------------------------------------
+-- ประเภทเมนู
+INSERT INTO categories (category_name) VALUES
+('Caramel Milk'),
+('Cocoa'),
+('Thai Milk Tea'),
+('Uji Matcha / Houjicha'),
+('Matcha Orange'),
+('Pure Matcha');
+
+-- เมนูตัวอย่าง
+INSERT INTO menu_items (category_id, item_name, description, price, size) VALUES
+(1, 'Caramel Milk', 'นมคาราเมลร้อน', 65.00, 'HOT'),
+(1, 'Caramel Milk', 'นมคาราเมลเย็น', 70.00, 'ICED'),
+(1, 'Caramel Milk', 'นมคาราเมลปั่น', 75.00, 'FRAPPE'),
+
+(2, 'Cocoa', 'โกโก้ร้อน', 60.00, 'HOT'),
+(2, 'Cocoa', 'โกโก้เย็น', 65.00, 'ICED'),
+(2, 'Cocoa', 'โกโก้ปั่น', 70.00, 'FRAPPE'),
+
+(3, 'Thai Milk Tea', 'ชาไทยร้อน', 55.00, 'HOT'),
+(3, 'Thai Milk Tea', 'ชาไทยเย็น', 60.00, 'ICED'),
+(3, 'Thai Milk Tea', 'ชาไทยปั่น', 65.00, 'FRAPPE');

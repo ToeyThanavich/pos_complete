@@ -1,0 +1,284 @@
+<?php
+require 'auth.php';
+include '../connect.php';
+include '../functions.php';
+
+// POST: อัปเดตสถานะ
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $action = $_POST['action'] ?? '';
+
+    if ($action === 'update_status') {
+        $oid = (int)$_POST['order_id'];
+        $status = $_POST['status'];
+        // เพิ่ม 'served' เข้าไปใน array ที่อนุญาตให้อัปเดต
+        $allowed = ['pending','cooking','serving','served','completed','cancelled'];
+        if (in_array($status, $allowed)) {
+            $conn->query("UPDATE orders SET status='$status', updated_at=NOW() WHERE order_id=$oid");
+        }
+    }
+
+    header("Location: staff_kitchen.php"); exit;
+}
+
+// ดึง active orders (ซ่อน 'served', 'completed', 'cancelled' ออกจากหน้าครัว)
+$orders = $conn->query("
+    SELECT o.*, t.table_name,
+           SUM(oi.quantity * oi.price) as total,
+           TIMESTAMPDIFF(MINUTE, o.created_at, NOW()) as minutes_ago
+    FROM orders o
+    JOIN tables t ON o.table_id=t.table_id
+    LEFT JOIN order_items oi ON o.order_id=oi.order_id
+    WHERE o.status NOT IN ('served','completed','cancelled')
+    GROUP BY o.order_id
+    ORDER BY FIELD(o.status,'pending','cooking','serving'), o.created_at ASC
+");
+$order_list = [];
+while ($o = $orders->fetch_assoc()) $order_list[] = $o;
+
+$status_map = ['pending'=>'รอรับออเดอร์','cooking'=>'กำลังทำ','serving'=>'พร้อมเสิร์ฟ'];
+$status_cls = ['pending'=>'bs-badge-pending','cooking'=>'bs-badge-cooking','serving'=>'bs-badge-serving'];
+// แก้ไขให้เสิร์ฟแล้วไปจบที่ 'served' ไม่ใช่ 'completed'
+$next_status = ['pending'=>'cooking','cooking'=>'serving','serving'=>'served'];
+$next_label  = ['pending'=>'🍳 เริ่มทำ','cooking'=>'🛎️ พร้อมเสิร์ฟ','serving'=>'✓ เสิร์ฟลูกค้าแล้ว'];
+?>
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+  <meta charset="UTF-8">
+  <title>สถานะครัว — Black Sheep</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&family=Prompt:wght@300;400;500&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="stylesheet" href="../assets/admin.css">
+  <style>
+  .kitchen-col-wrap {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  @media(max-width:900px) {
+    .kitchen-col-wrap {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .kitchen-col {
+    background: rgba(44, 24, 16, .03);
+    border-radius: 14px;
+    padding: 14px;
+    min-height: 200px;
+  }
+
+  .kitchen-col-title {
+    font-family: 'Kanit', sans-serif;
+    font-size: .85rem;
+    font-weight: 500;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .col-count {
+    background: var(--choco);
+    color: var(--cream);
+    border-radius: 50%;
+    width: 22px;
+    height: 22px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .65rem;
+  }
+
+  .ord-mini {
+    background: #FDFAF5;
+    border: 1px solid rgba(44, 24, 16, .08);
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+  }
+
+  .ord-mini.urgent {
+    border-color: rgba(192, 57, 43, .4);
+    background: #FFF5F5;
+    animation: urgentPulse 2s ease-in-out infinite;
+  }
+
+  @keyframes urgentPulse {
+
+    0%,
+    100% {
+      border-color: rgba(192, 57, 43, .3)
+    }
+
+    50% {
+      border-color: rgba(192, 57, 43, .7)
+    }
+  }
+
+  .ord-mini-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 8px;
+  }
+
+  .ord-mini-code {
+    font-size: .78rem;
+    font-weight: 500;
+    color: var(--choco);
+  }
+
+  .ord-mini-table {
+    font-size: .7rem;
+    color: var(--choco-light);
+  }
+
+  .ord-mini-time {
+    font-size: .68rem;
+    color: var(--choco-light);
+  }
+
+  .ord-mini-time.overdue {
+    color: #c0392b;
+    font-weight: 500;
+  }
+
+  .ord-mini-items {
+    margin-bottom: 10px;
+  }
+
+  .ord-mini-item {
+    font-size: .75rem;
+    color: var(--choco);
+    padding: 2px 0;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .ord-mini-note {
+    font-size: .68rem;
+    color: var(--choco-light);
+    font-style: italic;
+  }
+
+  .ord-mini-actions {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .ord-mini-btn {
+    flex: 1;
+    padding: 7px 10px;
+    border-radius: 8px;
+    border: none;
+    font-size: .7rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all .15s;
+  }
+
+  .btn-advance {
+    background: var(--choco);
+    color: var(--cream);
+  }
+
+  .btn-advance:hover {
+    background: var(--choco-mid);
+  }
+
+  .auto-badge {
+    font-size: .62rem;
+    background: #e8f3e8;
+    color: var(--botanical, #4A5E3A);
+    border-radius: 20px;
+    padding: 3px 8px;
+  }
+  </style>
+</head>
+
+<body>
+  <?php include 'sidebar.php'; ?>
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-title">🍳 สถานะครัว</div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span class="auto-badge">🔄 รีเฟรชทุก 20 วิ</span>
+        <button onclick="location.reload()" class="bs-btn bs-btn-outline bs-btn-sm">รีเฟรช</button>
+      </div>
+    </div>
+    <div class="page-content">
+      <?php
+      $by_status = ['pending'=>[], 'cooking'=>[], 'serving'=>[]];
+      foreach ($order_list as $o) {
+          if (isset($by_status[$o['status']])) $by_status[$o['status']][] = $o;
+      }
+      $col_titles = ['pending'=>'รอรับออเดอร์','cooking'=>'กำลังทำ','serving'=>'พร้อมเสิร์ฟ'];
+      $col_colors = ['pending'=>'var(--gold)','cooking'=>'#E8914A','serving'=>'var(--botanical,#4A5E3A)'];
+      ?>
+      <div class="kitchen-col-wrap">
+        <?php foreach ($by_status as $status => $col_orders): ?>
+        <div class="kitchen-col">
+          <div class="kitchen-col-title" style="color:<?= $col_colors[$status] ?>">
+            <?= $col_titles[$status] ?> <span class="col-count"><?= count($col_orders) ?></span>
+          </div>
+          <?php if (empty($col_orders)): ?>
+          <div style="text-align:center;padding:30px 0;font-size:.78rem;color:var(--choco-light);opacity:.4;">
+            ไม่มีรายการ</div>
+          <?php endif; ?>
+          <?php foreach ($col_orders as $o):
+            $is_urgent = ($o['minutes_ago'] >= 20 && $status !== 'serving');
+            $stmt = $conn->prepare("SELECT m.item_name, oi.quantity, oi.note FROM order_items oi JOIN menu_items m ON oi.item_id=m.item_id WHERE oi.order_id=?");
+            $stmt->bind_param('i',$o['order_id']); $stmt->execute();
+            $items = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+          ?>
+          <div class="ord-mini <?= $is_urgent ? 'urgent' : '' ?>">
+            <div class="ord-mini-header">
+              <div>
+                <div class="ord-mini-code"><?= htmlspecialchars($o['order_code']) ?></div>
+                <div class="ord-mini-table">🪑 <?= htmlspecialchars($o['table_name']) ?></div>
+              </div>
+              <div class="ord-mini-time <?= $is_urgent ? 'overdue' : '' ?>">
+                <?= $is_urgent ? '⚠️ ' : '' ?><?= $o['minutes_ago'] ?> นาที
+              </div>
+            </div>
+            <div class="ord-mini-items">
+              <?php foreach ($items as $it): ?>
+              <div class="ord-mini-item"><span><?= htmlspecialchars($it['item_name']) ?> ×<?= $it['quantity'] ?></span>
+              </div>
+              <?php if ($it['note']): ?><div class="ord-mini-note">→ <?= htmlspecialchars($it['note']) ?></div>
+              <?php endif; ?>
+              <?php endforeach; ?>
+            </div>
+            <div class="ord-mini-actions">
+              <?php if (isset($next_status[$status])): ?>
+              <form method="post" style="flex:1;display:flex;">
+                <input type="hidden" name="action" value="update_status">
+                <input type="hidden" name="order_id" value="<?= $o['order_id'] ?>">
+                <input type="hidden" name="status" value="<?= $next_status[$status] ?>">
+                <button type="submit" class="ord-mini-btn btn-advance"
+                  style="width:100%;"><?= $next_label[$status] ?></button>
+              </form>
+              <?php endif; ?>
+            </div>
+          </div>
+          <?php endforeach; ?>
+        </div>
+        <?php endforeach; ?>
+      </div>
+    </div>
+  </div>
+  <script>
+  setInterval(() => location.reload(), 20000);
+  </script>
+</body>
+
+</html>
