@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # ☕ Café POS — QR Scan & Ordering System
 
 > ระบบ POS สำหรับร้านคาเฟ่ รองรับการสั่งอาหารผ่าน QR Code พร้อม Admin Dashboard จัดการออเดอร์  
@@ -150,3 +151,6 @@ MIT License — Free to use and modify.
 ---
 
 *Developed as a cooperative education (สหกิจ) project — PHP + MySQL Café POS System*
+=======
+# pos_complete
+>>>>>>> e6a81da60d3a26e205230a2791d581f8898ccf17
